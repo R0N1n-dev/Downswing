@@ -1,0 +1,10 @@
+{
+  "appId": "com.example.downloadmanager",
+  "appName": "Download Manager",
+  "webDir": "dist",
+  "androidStatusBar": {
+    "style": "DARK",
+    "backgroundColor": "#0a101d",
+    "overlayWebView": false
+  }
+}
