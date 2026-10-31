@@ -4,4 +4,21 @@
     <string name="title_activity_main">Downly</string>
     <string name="package_name">com.example.downloadmanager</string>
     <string name="custom_url_scheme">com.example.downloadmanager</string>
+
+    <!-- Home-screen widget -->
+    <string name="widget_description">Shows active downloads and lets you start one from the clipboard.</string>
+    <string name="widget_idle">Nothing downloading — paste a link, then tap +</string>
+
+    <!-- Quick add (widget clipboard activity) -->
+    <string name="qa_title">Quick add</string>
+    <string name="qa_subtitle">Starts in the background — you stay on your home screen.</string>
+    <string name="qa_hint">https://… or magnet:?xt=…</string>
+    <string name="qa_no_link_hint">No link found — paste one here</string>
+    <string name="qa_no_link">No usable link was on the clipboard.</string>
+    <string name="qa_need_link">Paste a link first</string>
+    <string name="qa_started">Download started</string>
+    <string name="qa_failed">Could not start — open Downly instead</string>
+    <string name="qa_cancel">Cancel</string>
+    <string name="qa_start">Start download</string>
+    <string name="qa_open_app">Open Downly</string>
 </resources>

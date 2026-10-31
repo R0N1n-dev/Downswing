@@ -39,6 +39,29 @@ export function detectKind(input) {
   }
 }
 
+// Tracking params never change what you download, and they make the same link look new —
+// strip them so duplicate detection works. Signed and playlist params are kept: they can be
+// load-bearing. A bare domain ("example.com/file.zip") gains https:// so it is usable at all.
+const TRACKING = /^(utm_.*|gclid|fbclid|igsh.*|mc_eid|mc_cid|yclid|_hsenc|_hsmi|vero_.*)$/i
+
+export function sanitizeUrl(input) {
+  const v = (input || '').trim()
+  if (!v || isMagnet(v)) return v
+  let s = v
+  if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(s)) {
+    if (/^(?:[a-z0-9-]+\.)+[a-z]{2,}(?::\d+)?(?:[/?#]\S*)?$/i.test(s)) s = 'https://' + s
+    else return v
+  }
+  try {
+    const u = new URL(s)
+    if (!/^https?:$/.test(u.protocol)) return s
+    for (const k of [...u.searchParams.keys()]) if (TRACKING.test(k)) u.searchParams.delete(k)
+    return u.toString()
+  } catch {
+    return v
+  }
+}
+
 export function guessName(input, kind) {
   const v = input.trim()
   try {

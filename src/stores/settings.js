@@ -13,10 +13,15 @@ const defaults = () => ({
   quality: 720,
   startAuto: true,
   wifiOnly: false,
+  smartAudioFolder: true,
   theme: 'dark',
   palette: 'default',
   notifyComplete: true,
   notifyFail: true,
+  vibrateOnFinish: true,
+  chargingOnly: false,
+  appLock: false,
+  igCookie: '', // raw Cookie header for Instagram posts that need a logged-in session
 })
 
 function load() {

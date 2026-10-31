@@ -41,3 +41,5 @@ android/app/libs/
 
 # UI design exploration: mockup HTML and screenshots
 mockups/
+.freebuff
+android/local.properties

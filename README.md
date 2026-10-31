@@ -1,5 +1,54 @@
-# Vue 3 + Vite
+# Downly
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+A download manager for Android (and the browser preview): paste or share a link, pick a quality, watch it move through the queue. Video and audio come from yt-dlp, direct files and torrents from aria2, both running through the Capacitor plugins in `android/`.
 
-Learn more about IDE Support for Vue in the [Vue Docs Scaling up Guide](https://vuejs.org/guide/scaling-up/tooling.html#ide-support).
+```bash
+bun install       # dependencies
+bun run dev       # browser preview on :5173
+bun run build     # production build into dist/
+bun run sync      # build + cap sync android
+bun run build-debug   # full debug APK (gradlew assembleDebug)
+```
+
+## Design system
+
+The UI follows the pastel neo-brutalist signature spec (the “File Downloader — Signature System” sheet):
+
+- **Paper and ink.** A `#EFEAE0` ground with a faint dot grid, `#FFFCF5` cards, 3 px `#0E0E10` borders and hard offset shadows (`4px 4px 0`). Dark mode keeps the structure with cream ink and accent-tinted shadows.
+- **Type.** Archivo Black for titles, percentages and labels; Space Grotesk for everything else. Both load from `@fontsource` in `src/main.js`.
+- **Pastel meaning.** Mint = progress, lavender = video, peach = audio, blush = image/error, butter = waiting, sky = doc, lime = done. Every card says what it holds before you read the name.
+- **Signature moves.** Tape-style day headers (`.ghead`), a peel corner on the primary card (`.hero`, `.d-stage`), a progress dial (`.ring`), sticker buttons and chips.
+- **Motion.** Every transition and keyframe runs at **0.2 s or less** (`--t` in `src/style.css`), so state changes slide, lift or pop instead of appearing out of nowhere. The screen itself renders in place — no entrance slide to jitter on launch. `prefers-reduced-motion` turns all of it off.
+- **Legibility.** Text colours are contrast-checked rather than palette-mixed: muted grey is 6.4:1 on paper, link/accent text is forced to ≥4.5:1 for every palette, and disabled controls stay at 60% opacity.
+- **Colour themes.** The palettes in `src/lib/themes.js` still drive the accent (buttons, active tabs, badges) while the paper stays paper.
+
+Icons are [HugeIcons](https://www.hugeicons.com/) (`@hugeicons/core-free-icons` rendered through `HugeiconsIcon`), used everywhere instead of the previous set.
+
+## Features
+
+- **Share-sheet intake action sheet** — a link shared from any app opens a bottom sheet with the host and detected type, and three choices: *Download now* (straight into the queue with your defaults), *Options* (the Add screen, prefilled) or *Copy*. Android's back button closes the sheet before it leaves the app.
+- **Queue** — up to 6 simultaneous downloads, reorderable queue, pause/resume/retry, skip-the-line start, per-download and global speed limits, auto-retry with backoff for transient failures only.
+- **Controls on every unfinished row** — pause (or resume/retry) and cancel sit on the row itself, plus a cancel button on the hero card. Cancel stops the job, drops the record and offers **Undo** in the snackbar. Batch delete and *Remove from list* undo the same way.
+- **Add screen** — clipboard auto-detect, multi-link paste, `.txt` import, `.torrent` import with per-file selection, a link preview that probes size and content type before you commit, and YouTube search.
+- **Quality picker per source** — 240p–1080p for sites that offer a ladder; Instagram posts, reels and stories serve a single rendition, so the picker is hidden and Downly states that it takes the best available.
+- **Batch select** — *Select* on Done/Failed turns rows into checkboxes, with a batch bar showing count and total size, delete in one tap, and an **Undo** snackbar. The same undo appears after *Remove from list* in Details.
+- **Pause all / Resume all** — one tap under the tabs to stop or restart every lane.
+- **Library** — day-grouped history, file-type filter chips, search across everything, CSV export through the Android share sheet, SHA-256 verification, rename, open and share finished files.
+- **Network settings** — Wi-Fi only and charging-only live under Settings → Network (the bottom bar no longer carries a toggle); queued downloads wait for the right conditions.
+- **Instagram login cookie** — Settings → Instagram takes a raw `Cookie:` header so private, age-restricted or region-locked posts download. It is stored on device only and sent only to instagram.com (yt-dlp `--add-header Cookie:…`).
+- **Live notification** — the Android foreground notification mirrors the queue headline (`2 active · 4.1 MB/s · 3 queued`) as it changes, and completion notices carry size and quality.
+- **Navigation drawer** — mobile-first: a hamburger in the header slides in the section list (plus Settings), closes on a scrim tap, a nav tap or Android's back button. There is no bottom bar; Settings is also a gear in the header.
+- **Everything else** — home-screen widget jobs are adopted and polled, completion/failure notifications with optional vibration, biometric app lock, storage and success-rate stats, light/dark themes with 13 palettes picked from a swatch grid, and a theme segmented control.
+- **Launcher icon** — the sticker bolt (butter ground, open ink ring, mint bolt with ink outline and hard shadow). Adaptive vector for API 26+, themed-icon monochrome layer, and legacy PNGs at five densities rendered by `tools/gen_icons.py`; `public/favicon.svg` carries the same mark.
+
+## Layout
+
+```
+src/
+  App.vue            shell, lock screen, share action sheet, snackbar
+  components/        SideNav (drawer), Dock (status strip), DownloadRow, FileTile, ShareSheet, Switch, Stepper, FolderAccess
+  views/             Downloads (all sections), AddDownload, Details, Settings
+  stores/            downloads (queue engine), settings (persisted preferences)
+  lib/               detect, format, sections, share intake, toast, themes, options, lock
+  services/          yt-dlp, aria2, native Downly plugin, notifications
+```

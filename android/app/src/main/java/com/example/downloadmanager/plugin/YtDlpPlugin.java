@@ -101,6 +101,9 @@ public class YtDlpPlugin extends Plugin {
         boolean convertAudio = Boolean.TRUE.equals(call.getBoolean("convertAudio", false));
         String audioFormat = call.getString("audioFormat", "mp3");
         int rateLimitKb = call.getInt("rateLimitKb", 0);
+        // Optional browser cookie for sites that only serve the media to a logged-in session
+        // (Instagram posts, private videos). Sent as a raw Cookie header, e.g. "sessionid=…; …".
+        String cookieHeader = call.getString("cookieHeader", null);
         File dir = resolveOutputDir(call.getString("outputDir", null));
 
         String id = UUID.randomUUID().toString();
@@ -116,6 +119,9 @@ public class YtDlpPlugin extends Plugin {
                 request.addOption("--newline");
                 if (rateLimitKb > 0) {
                     request.addOption("--limit-rate", rateLimitKb + "K");
+                }
+                if (cookieHeader != null && !cookieHeader.trim().isEmpty()) {
+                    request.addOption("--add-header", "Cookie:" + cookieHeader.trim());
                 }
                 if (!"bestvideo+bestaudio".equals(format)) {
                     request.addOption("-f", format);

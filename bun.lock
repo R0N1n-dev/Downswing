@@ -14,8 +14,10 @@
         "@capacitor/local-notifications": "^8.3.1",
         "@capacitor/network": "^8.0.1",
         "@capacitor/status-bar": "^8.0.4",
-        "@fontsource-variable/manrope": "^5.3.0",
-        "lucide-vue-next": "^1.0.0",
+        "@fontsource/archivo-black": "^5.3.0",
+        "@fontsource/space-grotesk": "^5.3.0",
+        "@hugeicons/core-free-icons": "^4.4.0",
+        "@hugeicons/vue": "^1.0.8",
         "pinia": "^4.0.3",
         "vue": "^3.5.42",
         "vue-router": "^4.6.4",
@@ -58,7 +60,13 @@
 
     "@capacitor/synapse": ["@capacitor/synapse@1.0.4", "", {}, "sha512-/C1FUo8/OkKuAT4nCIu/34ny9siNHr9qtFezu4kxm6GY1wNFxrCFWjfYx5C1tUhVGz3fxBABegupkpjXvjCHrw=="],
 
-    "@fontsource-variable/manrope": ["@fontsource-variable/manrope@5.3.0", "", {}, "sha512-6D5dgokHsWDDMtmXHznKa0hK229NN+1a4BLPmUCLqcO1Pw5EEhWY5RFt0AcXnVRAljFFPfRtLkJePQj6LSsV6g=="],
+    "@fontsource/archivo-black": ["@fontsource/archivo-black@5.3.0", "", {}, "sha512-7EsTIQ+Blf96ktpzTUpI7msi+u9/AJxM/GZxOSkEubVd1jSTrFSTNxMgfpX/8rQsjZ+19a+qvRbtcTEp5J/72g=="],
+
+    "@fontsource/space-grotesk": ["@fontsource/space-grotesk@5.3.0", "", {}, "sha512-ksnGizDPXIDuvqcTYTSrmZ+evx9sDlS8rp7+42BQ7wU+spt3twEoXfbJz672C+5CLg6VeUQwRy5RXshWb67LcQ=="],
+
+    "@hugeicons/core-free-icons": ["@hugeicons/core-free-icons@4.4.0", "", {}, "sha512-7Mz8bmGoY6tZ6l3C2TXwNMLVSr0I8HPwjjFIERAuJFj3rWwLxdF2ZLkDqdrVuEE1dx5b/VXyIsP4WoSU6Q40KQ=="],
+
+    "@hugeicons/vue": ["@hugeicons/vue@1.0.8", "", { "peerDependencies": { "vue": "^2.6.0 || ^3.0.0" } }, "sha512-T1fNH9/+0QntvNsWJRpWj9AlSXpHkHPNdf35/UWcVWQpPzm2BbH1heW2pSIKRka6NoXSte2vzNRJmmriRPfxIQ=="],
 
     "@ionic/cli-framework-output": ["@ionic/cli-framework-output@2.2.8", "", { "dependencies": { "@ionic/utils-terminal": "2.3.5", "debug": "^4.0.0", "tslib": "^2.0.1" } }, "sha512-TshtaFQsovB4NWRBydbNFawql6yul7d5bMiW1WYYf17hd99V6xdDdk3vtF51bw6sLkxON3bDQpWsnUc9/hVo3g=="],
 
@@ -255,8 +263,6 @@
     "lightningcss-win32-x64-msvc": ["lightningcss-win32-x64-msvc@1.33.0", "", { "os": "win32", "cpu": "x64" }, "sha512-OlEICDx/Xl0FqSp4bry8zFnCvGpig3Gl4gCquvYwHuqJKEC1+n9NgDniFvqHGmMv1ZkqDJrDqKKSykTDX+ehuA=="],
 
     "lru-cache": ["lru-cache@11.5.3", "", {}, "sha512-U4N8FgzmWxc8k1VH8Kr6lQg18U7Fjvby6wXHVRX/ZZ7IwWbRMgrRbP0Wrb5q5NVinryp4SQampHKdvtecItxUg=="],
-
-    "lucide-vue-next": ["lucide-vue-next@1.0.0", "", { "peerDependencies": { "vue": ">=3.0.1" } }, "sha512-V6SPvx1IHTj/UY+FrIYWV5faISsPSb8BnWSFDxAtezWKvWc9ZZ40PDrdu1/Qb5vg4lHWr1hs1BAMGVGm6V1Xdg=="],
 
     "magic-string": ["magic-string@0.30.21", "", { "dependencies": { "@jridgewell/sourcemap-codec": "^1.5.5" } }, "sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ=="],
 

@@ -1,13 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Themed-icon silhouette (Android 13+): ring + bolt as one solid colour. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
     <path
+        android:pathData="M67.5,30.62 A27,27 0 1 1 40.5,30.62"
         android:strokeColor="#FFFFFF"
-        android:strokeWidth="4.4"
+        android:strokeWidth="9"
         android:strokeLineCap="round"
-        android:strokeLineJoin="round"
-        android:pathData="M54,38L54,60M43,50L54,61L65,50M40,70L68,70" />
+        android:fillColor="#00000000" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M56.2,32 L34.2,58.4 L54,58.4 L51.8,76 L73.8,49.6 L54,49.6 Z" />
 </vector>

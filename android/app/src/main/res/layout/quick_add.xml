@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Quick add card: translucent activity shown over the launcher. Reads the clipboard while
+     focused, starts a native download, finishes. Deliberately tiny — never the full app. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/quick_add_bg"
+    android:padding="20dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/qa_title"
+        android:textColor="#EEF3FF"
+        android:textSize="18sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="@string/qa_subtitle"
+        android:textColor="#8FA3C8"
+        android:textSize="13sp" />
+
+    <EditText
+        android:id="@+id/qa_url"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
+        android:background="@drawable/qa_field"
+        android:hint="@string/qa_hint"
+        android:importantForAutofill="no"
+        android:inputType="textUri"
+        android:maxLines="3"
+        android:padding="12dp"
+        android:textColor="#EEF3FF"
+        android:textColorHint="#5F719B"
+        android:textSize="14sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/qa_cancel"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_weight="1"
+            android:background="@drawable/quick_add_bg"
+            android:text="@string/qa_cancel"
+            android:textColor="#C7D4F2"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/qa_start"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_marginStart="10dp"
+            android:layout_weight="1.4"
+            android:background="@drawable/widget_btn"
+            android:text="@string/qa_start"
+            android:textColor="#08122B"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/qa_fallback"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/qa_no_link"
+            android:textColor="#8FA3C8"
+            android:textSize="12sp" />
+
+        <Button
+            android:id="@+id/qa_open_app"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/quick_add_bg"
+            android:text="@string/qa_open_app"
+            android:textColor="#C7D4F2"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+</LinearLayout>

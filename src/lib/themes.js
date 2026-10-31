@@ -15,6 +15,11 @@ export const PALETTES = [
   { id: 'bright-tech', name: 'The Bright Tech Vibe', group: 'triple', primary: '#2D3047', secondary: '#2EC4B6', accent: '#FF7A59', note: 'SaaS dashboards and data tracking' },
   { id: 'playful-pastel', name: 'The Playful Pastel', group: 'triple', primary: '#B298E7', secondary: '#B8E3E9', accent: '#F5B8D5', note: 'Social, mindfulness, and education' },
   { id: 'earthy-muted', name: 'The Earthy Muted', group: 'triple', primary: '#4A5842', secondary: '#EFEBE4', accent: '#D98A6C', note: 'Home decor, plants, and architecture' },
+
+  // Pastel color themes
+  { id: 'pastel-mint', name: 'Pastel Mint', group: 'pastel', primary: '#62B8A4', secondary: '#B2E5D8', accent: '#8FE0C2', note: 'Calm, wellness, and mindfulness' },
+  { id: 'pastel-peach', name: 'Pastel Peach', group: 'pastel', primary: '#E8A88C', secondary: '#F6D6C3', accent: '#FFC9A5', note: 'Warm lifestyle, food, and beauty' },
+  { id: 'pastel-sky', name: 'Pastel Sky', group: 'pastel', primary: '#86B4E6', secondary: '#C2DBF5', accent: '#A5CDF2', note: 'Airy productivity and journals' },
 ]
 
 export const PALETTE_IDS = PALETTES.map((p) => p.id)

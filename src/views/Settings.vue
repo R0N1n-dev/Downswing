@@ -1,18 +1,24 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { Folder } from 'lucide-vue-next'
+import { useRouter } from 'vue-router'
+import { HugeiconsIcon } from '@hugeicons/vue'
+import { Folder01Icon, ArrowLeft01Icon, CookieIcon, Wifi01Icon, BoltIcon } from '@hugeicons/core-free-icons'
 import { YtDlp } from '../services/ytdlp'
+import { Downly } from '../services/downly'
 import { useSettingsStore } from '../stores/settings'
+import { useDownloadsStore } from '../stores/downloads'
+import { formatBytes, parseSize } from '../lib/format'
 import { QUALITIES, FOLDERS } from '../lib/options'
-import { PALETTES, paletteById } from '../lib/themes'
+import { PALETTES } from '../lib/themes'
 import { showToast } from '../lib/toast'
 import Switch from '../components/Switch.vue'
-import SectionHeader from '../components/SectionHeader.vue'
 import Stepper from '../components/Stepper.vue'
 import FolderAccess from '../components/FolderAccess.vue'
 
+const router = useRouter()
 const engine = ref('Checking')
 const updating = ref(false)
+const bio = ref(null) // { supported, enrolled } — guards the app-lock switch
 
 onMounted(async () => {
   try {
@@ -20,6 +26,11 @@ onMounted(async () => {
     engine.value = version || 'Bundled build (Nov 2025)'
   } catch {
     engine.value = 'Android app only'
+  }
+  try {
+    bio.value = await Downly.canBiometric()
+  } catch {
+    bio.value = { supported: false, enrolled: false }
   }
 })
 
@@ -39,13 +50,36 @@ async function updateEngine() {
 const store = useSettingsStore()
 const s = store.s
 
+// Lifetime stats, computed from the real list.
+const downloadsStore = useDownloadsStore()
+const dlStats = computed(() => {
+  const list = downloadsStore.items
+  const finished = list.filter((i) => i.status === 'completed')
+  const failed = list.filter((i) => i.status === 'error')
+  const bytes = finished.reduce((sum, i) => sum + parseSize(i.totalText), 0)
+  const decided = finished.length + failed.length
+  return {
+    total: list.length,
+    finished: finished.length,
+    failed: failed.length,
+    bytes,
+    rate: decided ? Math.round((finished.length / decided) * 100) : null,
+  }
+})
+
 // Group palettes for the picker: base first, then dual, then triple.
 const paletteGroups = computed(() => [
   { label: 'Base', items: PALETTES.filter((p) => p.group === 'base') },
   { label: 'Dual color', items: PALETTES.filter((p) => p.group === 'dual') },
   { label: 'Triple color', items: PALETTES.filter((p) => p.group === 'triple') },
+  { label: 'Pastel', items: PALETTES.filter((p) => p.group === 'pastel') },
 ].filter((g) => g.items.length))
-const currentPalette = computed(() => paletteById(s.palette))
+const THEMES = [['dark', 'Dark'], ['light', 'Light'], ['system', 'System']]
+
+function clearCookie() {
+  s.igCookie = ''
+  showToast('Instagram cookie cleared')
+}
 
 const speed = (kb) => (kb === 0 ? 'No limit' : kb >= 1024 ? `${(kb / 1024).toFixed(kb % 1024 ? 1 : 0)} MB/s` : `${kb} KB/s`)
 
@@ -58,12 +92,15 @@ function reset() {
 </script>
 
 <template>
-  <SectionHeader title="Settings" />
+  <header class="top">
+    <button class="icon-btn" aria-label="Back" @click="router.back()"><HugeiconsIcon :icon="ArrowLeft01Icon" :size="24" :stroke-width="2.2" /></button>
+    <h1 class="title-sm">Settings</h1>
+  </header>
 
   <h2 class="section-title">Downloads</h2>
   <div class="group">
     <label class="setting stack">
-      <span class="s-label"><Folder :size="18" /> Download folder</span>
+      <span class="s-label"><HugeiconsIcon :icon="Folder01Icon" :size="18" /> Download folder</span>
       <select v-model="s.folder" class="plain">
         <option v-for="f in FOLDERS" :key="f.value" :value="f.value">{{ f.label }}</option>
       </select>
@@ -78,37 +115,82 @@ function reset() {
     <div class="setting"><span>Max simultaneous downloads</span><Stepper v-model="s.maxSimultaneous" :min="1" :max="6" /></div>
     <div class="setting"><span>Max download speed</span><Stepper v-model="s.maxSpeedKb" :min="0" :max="20480" :step="512" :format="speed" /></div>
     <div class="setting"><span>Start downloads automatically</span><Switch v-model="s.startAuto" label="Start downloads automatically" /></div>
-    <div class="setting"><span>Wi-Fi only</span><Switch v-model="s.wifiOnly" label="Wi-Fi only" /></div>
+    <div class="setting"><span>Audio downloads go to Music</span><Switch v-model="s.smartAudioFolder" label="Audio downloads go to Music" /></div>
+  </div>
+
+  <h2 class="section-title">Network</h2>
+  <div class="group">
+    <div class="setting"><span class="s-label"><HugeiconsIcon :icon="Wifi01Icon" :size="17" /> Wi-Fi only</span><Switch v-model="s.wifiOnly" label="Wi-Fi only" /></div>
+    <p v-if="s.wifiOnly" class="hint pad">Queued downloads wait until the phone is on Wi-Fi; they fail fast on mobile data instead of burning it.</p>
+    <div class="setting"><span class="s-label"><HugeiconsIcon :icon="BoltIcon" :size="17" /> Only download while charging</span><Switch v-model="s.chargingOnly" label="Only download while charging" /></div>
+    <p v-if="s.chargingOnly" class="hint pad">Queued downloads wait until the charger is connected.</p>
+  </div>
+
+  <h2 class="section-title">Instagram</h2>
+  <div class="group">
+    <label class="setting stack" for="igcookie">
+      <span class="s-label"><HugeiconsIcon :icon="CookieIcon" :size="17" /> Cookie for logged-in posts</span>
+      <input id="igcookie" v-model="s.igCookie" class="text-in" type="text" spellcheck="false" autocomplete="off"
+        autocapitalize="off" placeholder="sessionid=…; csrftoken=…; ds_user_id=…">
+    </label>
+    <p class="hint pad">Private, age-restricted or region-locked Instagram posts only download with your session cookie. In a browser: open the post, DevTools → Network → any request → Request Headers → copy the <b>Cookie</b> value. It stays on this device and is sent only to instagram.com.</p>
+    <div v-if="s.igCookie" class="setting">
+      <span class="muted small">Cookie saved · {{ s.igCookie.length }} chars</span>
+      <button class="text-btn" @click="clearCookie">Clear</button>
+    </div>
   </div>
 
   <h2 class="section-title">Appearance</h2>
   <div class="group">
-    <div class="setting"><span>Theme</span>
-      <select v-model="s.theme" class="plain right">
-        <option value="dark">Dark</option>
-        <option value="light">Light</option>
-        <option value="system">Match system</option>
-      </select>
+    <div class="setting">
+      <span>Theme</span>
+      <div class="seg three" role="radiogroup" aria-label="Theme">
+        <button v-for="[v, label] in THEMES" :key="v" role="radio" :aria-checked="s.theme === v"
+          :class="{ on: s.theme === v }" @click="s.theme = v">{{ label }}</button>
+      </div>
     </div>
-    <div class="setting"><span>Color theme</span>
-      <select v-model="s.palette" class="plain right">
-        <optgroup v-for="g in paletteGroups" :key="g.label" :label="g.label">
-          <option v-for="p in g.items" :key="p.id" :value="p.id">{{ p.name }}</option>
-        </optgroup>
-      </select>
+  </div>
+
+  <div v-for="g in paletteGroups" :key="g.label" class="pal-block">
+    <span class="tape pal-tape">{{ g.label }}</span>
+    <div class="pal-grid" role="radiogroup" :aria-label="`${g.label} colour themes`">
+      <button v-for="p in g.items" :key="p.id" class="pal" :class="{ on: s.palette === p.id }"
+        role="radio" :aria-checked="s.palette === p.id" @click="s.palette = p.id">
+        <span class="pal-dots">
+          <i :style="{ background: p.primary }" />
+          <i v-if="p.secondary" :style="{ background: p.secondary }" />
+          <i :style="{ background: p.accent }" />
+        </span>
+        <span class="pal-name">{{ p.name }}</span>
+      </button>
     </div>
-    <div class="swatch-row">
-      <span class="swatch" :style="{ background: currentPalette.primary }" />
-      <span v-if="currentPalette.secondary" class="swatch" :style="{ background: currentPalette.secondary }" />
-      <span class="swatch" :style="{ background: currentPalette.accent }" />
-      <span class="swatch-note muted">{{ currentPalette.note || 'App accent color' }}</span>
-    </div>
+  </div>
+
+  <p class="hint">Colour theme changes the buttons, active tabs and badges — the paper, ink and pastels stay the same.</p>
+
+  <h2 class="section-title">Your downloads</h2>
+  <div class="group">
+    <template v-if="dlStats.total">
+      <div class="setting"><span>Finished</span><span class="muted num">{{ dlStats.finished }} of {{ dlStats.total }}</span></div>
+      <div class="setting"><span>Data finished</span><span class="muted num">{{ formatBytes(dlStats.bytes) }}</span></div>
+      <div v-if="dlStats.rate !== null" class="setting"><span>Success rate</span><span class="muted num">{{ dlStats.rate }}%</span></div>
+      <div v-if="dlStats.failed" class="setting"><span>Failed</span><span class="bad num">{{ dlStats.failed }}</span></div>
+    </template>
+    <div v-else class="setting"><span class="muted">No downloads yet</span></div>
   </div>
 
   <h2 class="section-title">Notifications</h2>
   <div class="group">
     <div class="setting"><span>Download complete</span><Switch v-model="s.notifyComplete" label="Notify when complete" /></div>
     <div class="setting"><span>Download failed</span><Switch v-model="s.notifyFail" label="Notify when failed" /></div>
+    <div class="setting"><span>Vibrate when complete</span><Switch v-model="s.vibrateOnFinish" label="Vibrate when complete" /></div>
+  </div>
+
+  <h2 class="section-title">Security</h2>
+  <div class="group">
+    <div class="setting"><span>Lock app with biometrics</span><Switch v-model="s.appLock" :disabled="!!bio && !bio.enrolled" label="Lock app with biometrics" /></div>
+    <p v-if="bio && !bio.enrolled" class="hint pad">{{ bio.supported ? 'Set up a fingerprint or face unlock on this device first.' : 'This device has no fingerprint or face unlock.' }}</p>
+    <p v-else class="hint pad">Downly asks for your fingerprint, face or screen lock when it opens.</p>
   </div>
 
   <h2 class="section-title">Engine</h2>

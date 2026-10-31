@@ -28,6 +28,10 @@ public class DownloadService extends Service {
     private static int nativeJobs = 0;
     private static int pending = 0;
 
+    /** Live headline pushed by the web layer ("2 active · 4.1 MB/s · 3 queued"). */
+    private static String statusText = "";
+    private static boolean running = false;
+
     private PowerManager.WakeLock wakeLock;
 
     static synchronized void jobStarted(Context context) {
@@ -43,6 +47,39 @@ public class DownloadService extends Service {
     static synchronized void setPending(Context context, int count) {
         pending = Math.max(0, count);
         sync(context);
+    }
+
+    /** Re-post the foreground notification with the current speed and queue state. */
+    static synchronized void setStatus(Context context, String text) {
+        String next = text == null ? "" : text.trim();
+        if (next.equals(statusText)) return;
+        statusText = next;
+        if (!running) return; // nothing shown yet; onStartCommand picks the text up
+        NotificationManager nm = context.getSystemService(NotificationManager.class);
+        if (nm != null) nm.notify(NOTIFICATION_ID, build(context.getApplicationContext()));
+    }
+
+    private static Notification build(Context ctx) {
+        String text = !statusText.isEmpty()
+            ? statusText
+            : (nativeJobs > 0
+                ? nativeJobs + (nativeJobs == 1 ? " download running" : " downloads running")
+                : "Downloads queued");
+
+        Intent open = ctx.getPackageManager().getLaunchIntentForPackage(ctx.getPackageName());
+        PendingIntent tap = PendingIntent.getActivity(ctx, 0, open, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+
+        return new NotificationCompat.Builder(ctx, CHANNEL)
+            .setSmallIcon(com.example.downloadmanager.R.drawable.ic_stat_bolt)
+            .setContentTitle("Downly")
+            .setContentText(text)
+            .setStyle(new NotificationCompat.BigTextStyle().bigText(text))
+            .setContentIntent(tap)
+            .setShowWhen(false)
+            .setOngoing(true)
+            .setOnlyAlertOnce(true)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .build();
     }
 
     private static synchronized int jobs() {
@@ -78,21 +115,8 @@ public class DownloadService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        int running = jobs();
-        String text = running > 0 ? running + (running == 1 ? " download running" : " downloads running") : "Downloads queued";
-
-        Intent open = getPackageManager().getLaunchIntentForPackage(getPackageName());
-        PendingIntent tap = PendingIntent.getActivity(this, 0, open, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
-
-        Notification notification = new NotificationCompat.Builder(this, CHANNEL)
-            .setSmallIcon(android.R.drawable.stat_sys_download)
-            .setContentTitle("Downly")
-            .setContentText(text)
-            .setContentIntent(tap)
-            .setOngoing(true)
-            .setOnlyAlertOnce(true)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
-            .build();
+        running = true;
+        Notification notification = build(this);
 
         ServiceCompat.startForeground(this, NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC);
         return START_NOT_STICKY;
@@ -106,6 +130,7 @@ public class DownloadService extends Service {
 
     @Override
     public void onDestroy() {
+        running = false;
         if (wakeLock != null && wakeLock.isHeld()) wakeLock.release();
         super.onDestroy();
     }

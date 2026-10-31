@@ -1,4 +1,7 @@
-import '@fontsource-variable/manrope'
+import '@fontsource/archivo-black'
+import '@fontsource/space-grotesk/400.css'
+import '@fontsource/space-grotesk/500.css'
+import '@fontsource/space-grotesk/700.css'
 import './style.css'
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
