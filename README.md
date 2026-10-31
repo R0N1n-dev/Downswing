@@ -18,7 +18,8 @@ The UI follows the pastel neo-brutalist signature spec (the “File Downloader �
 - **Type.** Archivo Black for titles, percentages and labels; Space Grotesk for everything else. Both load from `@fontsource` in `src/main.js`.
 - **Pastel meaning.** Mint = progress, lavender = video, peach = audio, blush = image/error, butter = waiting, sky = doc, lime = done. Every card says what it holds before you read the name.
 - **Signature moves.** Tape-style day headers (`.ghead`), a peel corner on the primary card (`.hero`, `.d-stage`), a progress dial (`.ring`), sticker buttons and chips.
-- **Motion.** Every transition and keyframe runs at **0.2 s or less** (`--t` in `src/style.css`), so state changes slide, lift or pop instead of appearing out of nowhere. The screen itself renders in place — no entrance slide to jitter on launch. `prefers-reduced-motion` turns all of it off.
+- **Motion.** Every transition and keyframe runs at **0.2 s or less** (`--t` in `src/style.css`), so state changes slide, lift or pop instead of appearing out of nowhere. The screen itself renders in place — no entrance slide to jitter on launch, and nothing staggers in while the boot sticker is up (`html.booting`, cleared by `main.js`). `prefers-reduced-motion` turns all of it off.
+- **Opening.** `index.html` paints the saved theme and a full-screen sticker of the launcher mark **before** the bundle loads, so a cold start is one ground colour from the Android window through to the queue — no flash, no font swap, no rows shuffling into place. Vue mounts underneath the sticker; once the first paint *and* the webfonts are in (0.28 s minimum hold so it never blinks, 0.7 s cap) it fades over 0.18 s. The window colour lives in `android/app/src/main/res/values/colors.xml` (`boot_ground`) and matches `--bg` in dark.
 - **Legibility.** Text colours are contrast-checked rather than palette-mixed: muted grey is 6.4:1 on paper, link/accent text is forced to ≥4.5:1 for every palette, and disabled controls stay at 60% opacity.
 - **Colour themes.** The palettes in `src/lib/themes.js` still drive the accent (buttons, active tabs, badges) while the paper stays paper.
 
@@ -47,7 +48,7 @@ Icons are [HugeIcons](https://www.hugeicons.com/) (`@hugeicons/core-free-icons` 
 ```
 src/
   App.vue            shell, lock screen, share action sheet, snackbar
-  components/        SideNav (drawer), Dock (status strip), DownloadRow, FileTile, ShareSheet, ConfirmSheet, Switch, Stepper, FolderAccess
+  components/        SideNav (drawer), Dock (status strip, only while the queue moves), DownloadRow, FileTile, ShareSheet, ConfirmSheet, Switch, Stepper, FolderAccess
   views/             Downloads (all sections), AddDownload, Details, Settings
   stores/            downloads (queue engine), settings (persisted preferences)
   lib/               detect, format, sections, share intake, toast, themes, options, lock

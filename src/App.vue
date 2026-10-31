@@ -31,7 +31,9 @@ const exitMode = ref('')
 let backHandle
 let resumeHandle
 
-const showDock = computed(() => SECTIONS.some((s) => s.id === route.meta.section))
+// The status strip lives at the bottom of section screens, but only while the queue is moving:
+// an idle app keeps that space for the list.
+const showDock = computed(() => SECTIONS.some((s) => s.id === route.meta.section) && downloads.busy)
 
 watch(() => route.fullPath, () => screen.value?.scrollTo({ top: 0 }))
 

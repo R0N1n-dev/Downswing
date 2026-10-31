@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { Network } from '@capacitor/network'
 import { YtDlp } from '../services/ytdlp'
 import { Aria2 } from '../services/aria2'
@@ -70,6 +70,13 @@ export const useDownloadsStore = defineStore('downloads', () => {
     // Keep the widget's speed line live while downloads run.
     if (items.value.some((i) => i.status === 'downloading')) pushWidget()
   }, 2000)
+
+  // Anything in motion: live jobs, pending retries, rows waiting for a slot or for the charger.
+  // The status strip only earns its place on screen while this is true, so an idle app has a
+  // clean bottom edge instead of a badge that says nothing happened.
+  const busy = computed(() =>
+    waitingCharger.value || items.value.some((i) => ['downloading', 'retrying', 'queued'].includes(i.status))
+  )
 
   const engineOf = (item) => (item.kind === 'file' || item.kind === 'torrent' ? Aria2 : YtDlp)
   const byId = (id) => items.value.find((i) => i.id === id)
@@ -602,5 +609,5 @@ export const useDownloadsStore = defineStore('downloads', () => {
     ;[items.value[a], items.value[b]] = [items.value[b], items.value[a]]
   }
 
-  return { items, speedHistory, charging, waitingCharger, byId, init, add, pause, resume, pauseAll, resumeAll, startNow, cancel, remove, restore, clearFinished, move, pump, persist }
+  return { items, busy, speedHistory, charging, waitingCharger, byId, init, add, pause, resume, pauseAll, resumeAll, startNow, cancel, remove, restore, clearFinished, move, pump, persist }
 })
